@@ -39,3 +39,87 @@ input:focus, textarea:focus {
   border-color: rgba(34,197,94,0.4) !important;
   outline: none;
 }
+
+/* ── Responsive grid layouts ───────────────────────────── */
+.builder-grid {
+  display: grid;
+  grid-template-columns: 1fr 370px;
+  gap: 20px;
+}
+.ex-builder-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+}
+.pr-builder-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+}
+.region-risk-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+.builder-panel-sticky {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
+}
+
+/* ── Mobile-responsive overrides (< 768px) ─────────────── */
+@media (max-width: 767px) {
+  /* Single-column grids */
+  .builder-grid,
+  .ex-builder-grid,
+  .pr-builder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Prescription panel loses sticky on mobile */
+  .builder-panel-sticky {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  /* Region risk: 3 columns on mobile */
+  .region-risk-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Bottom-sheet modals */
+  .modal-sheet {
+    align-items: flex-end !important;
+  }
+  .modal-sheet-inner {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 22px 22px 0 0 !important;
+    max-height: 90vh !important;
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+  }
+  .modal-sheet-tall {
+    max-height: 96vh !important;
+  }
+
+  /* Patient cards: wrap actions onto second row */
+  .patient-card-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .patient-card-actions > button {
+    flex: 1;
+    min-height: 44px !important;
+    font-size: 12px !important;
+  }
+
+  /* Disable hover lift on touch */
+  .card-lift:hover {
+    transform: none;
+  }
+}

@@ -18,7 +18,7 @@ const NAV: { id: PhysioSection; label: string; icon: string }[] = [
 export function PhysioSidebar({ section, onSection }: PhysioSidebarProps) {
   return (
     <div
-      className="flex flex-col flex-shrink-0"
+      className="hidden md:flex md:flex-col flex-shrink-0"
       style={{
         width: 210,
         borderRight: "1px solid rgba(255,255,255,0.04)",

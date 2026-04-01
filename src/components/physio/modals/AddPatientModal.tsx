@@ -53,12 +53,12 @@ export function AddPatientModal({ form, onChange, onSubmit, onClose }: AddPatien
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50"
+      className="modal-sheet fixed inset-0 flex items-center justify-center z-50"
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
       onClick={onClose}
     >
       <div
-        className="relative w-[92%] max-w-[480px] max-h-[85vh] overflow-y-auto rounded-[20px] p-7"
+        className="modal-sheet-inner modal-sheet-tall relative w-[92%] max-w-[480px] max-h-[85vh] overflow-y-auto rounded-[20px] p-7"
         style={{
           background: "#151b28",
           border: "1px solid rgba(255,255,255,0.08)",

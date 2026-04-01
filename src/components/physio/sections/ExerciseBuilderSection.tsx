@@ -149,7 +149,7 @@ export function ExerciseBuilderSection({
 
       {/* ── EXERCISE BUILDER ── */}
       {activeTab === "exercise" && (
-        <div className="grid gap-6" style={{ gridTemplateColumns: "1fr 320px" }}>
+        <div className="ex-builder-grid">
           {/* Form */}
           <div
             className="rounded-[16px] p-5"
@@ -380,7 +380,7 @@ export function ExerciseBuilderSection({
 
       {/* ── PROTOCOL BUILDER ── */}
       {activeTab === "protocol" && (
-        <div className="grid gap-6" style={{ gridTemplateColumns: "1fr 380px" }}>
+        <div className="pr-builder-grid">
           {/* Form */}
           <div
             className="rounded-[16px] p-5"

@@ -77,22 +77,24 @@ export default function AthletePage() {
           {/* My Program tab */}
           <button
             onClick={() => setScreen("myprogram")}
-            className="px-3.5 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer"
+            className="px-3.5 rounded-lg text-[11px] font-semibold cursor-pointer flex items-center"
             style={{
               border: screen === "myprogram" ? "1px solid rgba(139,92,246,0.3)" : "1px solid rgba(255,255,255,0.06)",
               background: screen === "myprogram" ? "rgba(139,92,246,0.1)" : "rgba(255,255,255,0.03)",
               color: screen === "myprogram" ? "#a855f7" : "#4a5568",
+              minHeight: 44,
             }}
           >
-            📋 My Program
+            📋 <span className="hidden sm:inline ml-1">My Program</span>
           </button>
 
           {/* Streak */}
           <div
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 px-3.5 rounded-lg"
             style={{
               background: "rgba(255,255,255,0.03)",
               border: "1px solid rgba(255,255,255,0.06)",
+              minHeight: 44,
             }}
           >
             <span className="text-[15px]">🔥</span>
@@ -107,11 +109,12 @@ export default function AthletePage() {
           {/* Switch Role */}
           <Link
             href="/"
-            className="px-3 py-1.5 rounded-lg text-[10px] font-semibold no-underline"
+            className="px-3 rounded-lg text-[10px] font-semibold no-underline hidden sm:flex items-center"
             style={{
               border: "1px solid rgba(255,255,255,0.06)",
               background: "transparent",
               color: "#3d4450",
+              minHeight: 44,
             }}
           >
             Switch Role

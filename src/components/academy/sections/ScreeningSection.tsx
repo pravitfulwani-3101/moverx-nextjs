@@ -117,7 +117,7 @@ export function ScreeningSection() {
         <div className="text-sm font-bold mb-3.5" style={{ color: "#f0f6fc" }}>
           🔍 Squad-wide region risk
         </div>
-        <div className="grid gap-2.5" style={{ gridTemplateColumns: "repeat(6,1fr)" }}>
+        <div className="region-risk-grid">
           {BODY_REGIONS.map((r) => {
             const scores = ACADEMY_ATHLETES.map((a) => a.scores[r]);
             const avg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);

@@ -17,12 +17,12 @@ export function ViewPatientModal({ patient, onPrescribe, onEdit, onClose }: View
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50"
+      className="modal-sheet fixed inset-0 flex items-center justify-center z-50"
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
       onClick={onClose}
     >
       <div
-        className="w-[92%] max-w-[440px] rounded-[20px] p-7"
+        className="modal-sheet-inner w-[92%] max-w-[440px] rounded-[20px] p-7"
         style={{ background: "#151b28", border: "1px solid rgba(255,255,255,0.08)" }}
         onClick={(e) => e.stopPropagation()}
       >

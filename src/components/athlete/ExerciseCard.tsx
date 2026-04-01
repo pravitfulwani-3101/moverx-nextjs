@@ -27,17 +27,22 @@ export function ExerciseCard({ exercise: ex, done, index, onToggle }: ExerciseCa
         className="flex items-center gap-3 px-[18px] py-4 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
-        {/* Checkbox */}
+        {/* Checkbox — wrapped in 44px touch target */}
         <div
           onClick={(e) => { e.stopPropagation(); onToggle(); }}
-          className="w-[26px] h-[26px] rounded-[7px] flex items-center justify-center flex-shrink-0 cursor-pointer text-[13px]"
-          style={{
-            border: `2px solid ${done ? "#22c55e" : "rgba(255,255,255,0.1)"}`,
-            background: done ? "rgba(34,197,94,0.12)" : "transparent",
-            color: "#22c55e",
-          }}
+          className="flex items-center justify-center flex-shrink-0 cursor-pointer"
+          style={{ width: 44, height: 44 }}
         >
-          {done ? "✓" : ""}
+          <div
+            className="w-[26px] h-[26px] rounded-[7px] flex items-center justify-center text-[13px]"
+            style={{
+              border: `2px solid ${done ? "#22c55e" : "rgba(255,255,255,0.1)"}`,
+              background: done ? "rgba(34,197,94,0.12)" : "transparent",
+              color: "#22c55e",
+            }}
+          >
+            {done ? "✓" : ""}
+          </div>
         </div>
 
         {/* Info */}
@@ -107,8 +112,8 @@ export function ExerciseCard({ exercise: ex, done, index, onToggle }: ExerciseCa
           {!done && (
             <button
               onClick={onToggle}
-              className="w-full py-2.5 rounded-[9px] text-xs font-semibold cursor-pointer border-none mt-3"
-              style={{ background: "rgba(34,197,94,0.08)", color: "#22c55e" }}
+              className="w-full rounded-[9px] text-xs font-semibold cursor-pointer border-none mt-3"
+              style={{ background: "rgba(34,197,94,0.08)", color: "#22c55e", minHeight: 44 }}
             >
               ✓ Mark as Done
             </button>

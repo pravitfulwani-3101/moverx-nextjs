@@ -19,7 +19,7 @@ interface BuilderSectionProps {
   onNote: (n: string) => void;
   onLoadProtocol: () => void;
   onWhatsApp: () => void;
-  onPdf: () => void;
+  onPdf: () => void | Promise<void>;
 }
 
 const FREQUENCIES = ["Once daily", "Twice daily", "3x/week"];
@@ -73,7 +73,7 @@ export function BuilderSection({
         </button>
       </div>
 
-      <div className="grid gap-5" style={{ gridTemplateColumns: "1fr 370px" }}>
+      <div className="builder-grid">
         {/* ── Exercise Library ── */}
         <div>
           {/* Category filters */}
@@ -113,7 +113,7 @@ export function BuilderSection({
             className="grid gap-1.5 overflow-y-auto pr-1"
             style={{
               gridTemplateColumns: "1fr 1fr",
-              maxHeight: "calc(100vh - 260px)",
+              maxHeight: "min(600px, calc(100vh - 260px))",
             }}
           >
             {filtered.map((ex) => {
@@ -165,14 +165,10 @@ export function BuilderSection({
 
         {/* ── Prescription Panel ── */}
         <div
-          className="rounded-2xl p-5 overflow-y-auto"
+          className="builder-panel-sticky rounded-2xl p-5"
           style={{
             background: "rgba(255,255,255,0.02)",
             border: "1px solid rgba(255,255,255,0.05)",
-            position: "sticky",
-            top: 20,
-            alignSelf: "start",
-            maxHeight: "calc(100vh - 70px)",
           }}
         >
           <div className="text-sm font-bold mb-3.5" style={{ color: "#f0f6fc" }}>

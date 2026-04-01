@@ -16,6 +16,10 @@ import { WhatsAppModal } from "@/components/physio/modals/WhatsAppModal";
 import { ProtocolPickerModal } from "@/components/physio/modals/ProtocolPickerModal";
 
 import { Toast, useToast } from "@/components/ui/Toast";
+import { BottomTabBar, type BottomTab } from "@/components/ui/BottomTabBar";
+
+import { generatePrescriptionPdf } from "@/lib/generatePrescriptionPdf";
+import { openWhatsApp } from "@/lib/sendWhatsApp";
 
 import { DEMO_PATIENTS } from "@/data/demo";
 import { EXERCISE_DB, PROTOCOLS } from "@/data/constants";
@@ -29,6 +33,14 @@ function generateAvatar(name: string) {
     ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
     : name.slice(0, 2).toUpperCase();
 }
+
+const PHYSIO_TABS: BottomTab[] = [
+  { id: "patients",         label: "Patients",  icon: "👥" },
+  { id: "builder",          label: "Prescribe", icon: "📋" },
+  { id: "protocols",        label: "Protocols", icon: "📚" },
+  { id: "exercise-builder", label: "Builder",   icon: "🔧" },
+  { id: "analytics",        label: "Analytics", icon: "📊" },
+];
 
 export default function PhysioPage() {
   const { toast, flash } = useToast();
@@ -137,7 +149,6 @@ export default function PhysioPage() {
 
   // ── Protocol loading (standard + custom) ────────────────────
   const loadProtocol = (protocolId: string) => {
-    // Check custom protocols first
     const customPr = customProtocols.find((p) => p.id === protocolId);
     if (customPr) {
       const allExs = [...EXERCISE_DB, ...customExercises];
@@ -148,7 +159,6 @@ export default function PhysioPage() {
       setPrescription(exs); setNote(customPr.notes);
       setShowProto(false); flash(`Loaded: ${customPr.name}`); setSection("builder"); return;
     }
-    // Standard protocols
     const pr = PROTOCOLS.find((p) => p.id === protocolId);
     if (!pr) return;
     const exs: PrescribedExercise[] = pr.exercises
@@ -161,15 +171,15 @@ export default function PhysioPage() {
 
   return (
     <div
-      className="flex min-h-screen"
+      className="flex flex-col md:flex-row min-h-screen"
       style={{ background: "linear-gradient(160deg,#060810 0%,#0b0f19 50%,#080c14 100%)", color: "#b0b8c4" }}
     >
       <Toast show={toast.show} message={toast.message} />
 
       <PhysioSidebar section={section} onSection={setSection} />
 
-      <div className="flex-1 overflow-auto" style={{ maxHeight: "100vh" }}>
-        <div className="p-[22px_28px] max-w-[1080px]">
+      <div className="flex-1 overflow-auto md:max-h-screen">
+        <div className="p-5 md:p-[22px_28px] max-w-[1080px] pb-24 md:pb-6">
 
           {section === "patients" && (
             <PatientsSection
@@ -196,7 +206,14 @@ export default function PhysioPage() {
               onNote={setNote}
               onLoadProtocol={() => setShowProto(true)}
               onWhatsApp={() => setShowWA(true)}
-              onPdf={() => flash("PDF generated! (Demo)")}
+              onPdf={async () => {
+                try {
+                  await generatePrescriptionPdf(builderPatient, prescription, frequency, note);
+                  flash("PDF downloaded!");
+                } catch {
+                  flash("PDF generation failed");
+                }
+              }}
             />
           )}
 
@@ -220,6 +237,13 @@ export default function PhysioPage() {
         </div>
       </div>
 
+      <BottomTabBar
+        tabs={PHYSIO_TABS}
+        active={section}
+        accentColor="#22c55e"
+        onTab={(id) => setSection(id as PhysioSection)}
+      />
+
       {showAddPt && (
         <AddPatientModal form={newPtForm} onChange={setNewPtForm}
           onSubmit={handleAddPatient} onClose={() => setShowAddPt(false)} />
@@ -237,7 +261,10 @@ export default function PhysioPage() {
       {showWA && (
         <WhatsAppModal patient={builderPatient} prescription={prescription}
           frequency={frequency} note={note}
-          onSend={() => { setShowWA(false); flash("Sent via WhatsApp! (Demo)"); }}
+          onSend={() => {
+            openWhatsApp(builderPatient?.phone, builderPatient, prescription, frequency, note);
+            setShowWA(false);
+          }}
           onClose={() => setShowWA(false)} />
       )}
       {showProto && (

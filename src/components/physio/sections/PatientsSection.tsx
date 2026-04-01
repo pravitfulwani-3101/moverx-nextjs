@@ -45,18 +45,19 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }
         </div>
         <button
           onClick={onAdd}
-          className="flex items-center gap-1.5 px-5 py-2.5 rounded-[10px] text-xs font-bold text-white border-none cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-3 rounded-[10px] text-xs font-bold text-white border-none cursor-pointer"
           style={{
             background: "linear-gradient(135deg,#22c55e,#16a34a)",
             boxShadow: "0 4px 16px rgba(34,197,94,0.2)",
+            minHeight: 44,
           }}
         >
-          ＋ Add Patient
+          ＋ Add
         </button>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-4 gap-2.5 mb-5">
+      {/* Stats row — 2 cols on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
         {stats.map((s) => (
           <div
             key={s.label}
@@ -79,13 +80,14 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search patients by name or condition..."
-        className="w-full px-4 py-2.5 rounded-[10px] text-xs mb-3.5"
+        placeholder="Search patients..."
+        className="w-full px-4 py-3 rounded-[10px] text-xs mb-3.5"
         style={{
           border: "1px solid rgba(255,255,255,0.06)",
           background: "rgba(255,255,255,0.02)",
           color: "#c9d1d9",
           outline: "none",
+          minHeight: 44,
         }}
       />
 
@@ -95,7 +97,7 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }
           <div className="text-4xl mb-3">👥</div>
           <div className="text-sm mb-1" style={{ color: "#4a5568" }}>No patients found</div>
           <div className="text-xs">
-            {patients.length === 0 ? 'Click "Add Patient" to get started' : "Try a different search"}
+            {patients.length === 0 ? 'Tap "Add" to get started' : "Try a different search"}
           </div>
         </div>
       )}
@@ -107,7 +109,7 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }
           return (
             <div
               key={p.id}
-              className="card-lift flex items-center gap-3.5 px-5 py-4 rounded-[13px]"
+              className="card-lift flex flex-wrap items-center gap-x-3.5 gap-y-0 px-4 py-3.5 rounded-[13px]"
               style={{
                 background: "rgba(255,255,255,0.02)",
                 border: "1px solid rgba(255,255,255,0.05)",
@@ -130,8 +132,8 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }
               </div>
 
               {/* Info */}
-              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onView(p)}>
-                <div className="flex items-center gap-1.5">
+              <div className="flex-1 min-w-0 cursor-pointer" style={{ minWidth: 0 }} onClick={() => onView(p)}>
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="font-semibold text-[13px]" style={{ color: "#f0f6fc" }}>{p.name}</span>
                   {p.status === "at-risk" && (
                     <span
@@ -150,31 +152,35 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }
                     </span>
                   )}
                 </div>
-                <div className="text-[10px] mt-0.5" style={{ color: "#3d4450" }}>
-                  {p.condition} · {p.sport}{p.age ? ` · Age ${p.age}` : ""} · {p.sessions} sessions
+                <div className="text-[10px] mt-0.5 truncate" style={{ color: "#3d4450" }}>
+                  {p.condition} · {p.sport}{p.age ? ` · ${p.age}y` : ""}
                 </div>
               </div>
 
               {/* Ring */}
               <Ring value={p.adherence} size={38} />
 
-              {/* Actions */}
-              <div className="flex gap-1.5 flex-shrink-0">
+              {/* Actions — full width on mobile (via CSS class) */}
+              <div className="patient-card-actions flex gap-1.5 flex-shrink-0">
                 <button
                   onClick={() => onEdit(p)}
-                  className="px-3 py-2 rounded-lg text-[10px] font-semibold cursor-pointer"
+                  className="px-3 py-2.5 rounded-lg text-[10px] font-semibold cursor-pointer"
                   style={{
                     border: "1px solid rgba(255,255,255,0.06)",
                     background: "rgba(255,255,255,0.03)",
                     color: "#4a5568",
+                    minHeight: 44,
                   }}
                 >
                   ✏️ Edit
                 </button>
                 <button
                   onClick={() => onPrescribe(p)}
-                  className="px-4 py-2 rounded-lg text-[11px] font-semibold text-white cursor-pointer border-none"
-                  style={{ background: "linear-gradient(135deg,#22c55e,#16a34a)" }}
+                  className="px-4 py-2.5 rounded-lg text-[11px] font-semibold text-white cursor-pointer border-none"
+                  style={{
+                    background: "linear-gradient(135deg,#22c55e,#16a34a)",
+                    minHeight: 44,
+                  }}
                 >
                   ＋ Prescribe
                 </button>
