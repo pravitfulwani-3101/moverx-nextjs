@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { PhysioSidebar, type PhysioSection } from "@/components/physio/PhysioSidebar";
 import { PatientsSection } from "@/components/physio/sections/PatientsSection";
@@ -20,6 +20,12 @@ import { BottomTabBar, type BottomTab } from "@/components/ui/BottomTabBar";
 
 import { generatePrescriptionPdf } from "@/lib/generatePrescriptionPdf";
 import { openWhatsApp } from "@/lib/sendWhatsApp";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
+import {
+  fetchPatients, insertPatient, updatePatient, deletePatient as dbDeletePatient,
+  fetchCustomExercises, insertCustomExercise, deleteCustomExercise as dbDeleteExercise,
+  fetchCustomProtocols, insertCustomProtocol, deleteCustomProtocol as dbDeleteProtocol,
+} from "@/lib/supabase/db";
 
 import { DEMO_PATIENTS } from "@/data/demo";
 import { EXERCISE_DB, PROTOCOLS } from "@/data/constants";
@@ -44,12 +50,14 @@ const PHYSIO_TABS: BottomTab[] = [
 
 export default function PhysioPage() {
   const { toast, flash } = useToast();
+  const [dbReady, setDbReady] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // ── Navigation ──────────────────────────────────────────────
   const [section, setSection] = useState<PhysioSection>("patients");
 
   // ── Patients ────────────────────────────────────────────────
-  const [patients, setPatients] = useState<Patient[]>(DEMO_PATIENTS);
+  const [patients, setPatients] = useState<Patient[]>([]);
 
   // ── Modals ──────────────────────────────────────────────────
   const [showAddPt, setShowAddPt] = useState(false);
@@ -72,8 +80,31 @@ export default function PhysioPage() {
   const [customExercises, setCustomExercises] = useState<CustomExercise[]>([]);
   const [customProtocols, setCustomProtocols] = useState<CustomProtocol[]>([]);
 
+  // ── Load from Supabase (or fallback to demo data) ──────────
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    const hasDb = isSupabaseConfigured();
+    setDbReady(hasDb);
+
+    if (hasDb) {
+      const [pts, exs, prs] = await Promise.all([
+        fetchPatients(),
+        fetchCustomExercises(),
+        fetchCustomProtocols(),
+      ]);
+      setPatients(pts.length > 0 ? pts : DEMO_PATIENTS);
+      setCustomExercises(exs);
+      setCustomProtocols(prs);
+    } else {
+      setPatients(DEMO_PATIENTS);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
   // ── Patient CRUD ─────────────────────────────────────────────
-  const handleAddPatient = () => {
+  const handleAddPatient = async () => {
     if (!newPtForm.name.trim() || !newPtForm.phone.trim()) {
       flash("Name and phone are required"); return;
     }
@@ -89,32 +120,54 @@ export default function PhysioPage() {
       status: "active", prescribedExercises: [],
       notes: newPtForm.notes,
     };
+
+    // Optimistic UI update
     setPatients([pt, ...patients]);
     setNewPtForm(BLANK_FORM);
     setShowAddPt(false);
     flash(`Added: ${pt.name}`);
+
+    // Persist to DB
+    if (dbReady) {
+      const ok = await insertPatient(pt);
+      if (!ok) flash("Warning: failed to save to database");
+    }
   };
 
-  const handleEditPatient = () => {
+  const handleEditPatient = async () => {
     if (!editPtForm.name.trim() || !editPtForm.phone.trim()) {
       flash("Name and phone are required"); return;
     }
-    setPatients(patients.map((p) =>
-      p.id === showEditPt!.id
-        ? { ...p, name: editPtForm.name.trim(), phone: editPtForm.phone.trim(),
-            condition: editPtForm.condition || p.condition, sport: editPtForm.sport || p.sport,
-            age: parseInt(editPtForm.age) || p.age, avatar: generateAvatar(editPtForm.name),
-            notes: editPtForm.notes }
-        : p
-    ));
+    const id = showEditPt!.id;
+    const updates = {
+      name: editPtForm.name.trim(),
+      phone: editPtForm.phone.trim(),
+      condition: editPtForm.condition || showEditPt!.condition,
+      sport: editPtForm.sport || showEditPt!.sport,
+      age: parseInt(editPtForm.age) || showEditPt!.age,
+      avatar: generateAvatar(editPtForm.name),
+      notes: editPtForm.notes,
+    };
+
+    setPatients(patients.map((p) => p.id === id ? { ...p, ...updates } : p));
     setShowEditPt(null);
     flash("Patient updated");
+
+    if (dbReady) {
+      const ok = await updatePatient(id, updates);
+      if (!ok) flash("Warning: failed to update in database");
+    }
   };
 
-  const handleDeletePatient = (pt: Patient) => {
+  const handleDeletePatient = async (pt: Patient) => {
     setPatients(patients.filter((p) => p.id !== pt.id));
     setShowEditPt(null); setShowViewPt(null);
     flash(`Removed: ${pt.name}`);
+
+    if (dbReady) {
+      const ok = await dbDeletePatient(pt.id);
+      if (!ok) flash("Warning: failed to delete from database");
+    }
   };
 
   const openEdit = (pt: Patient) => {
@@ -126,6 +179,27 @@ export default function PhysioPage() {
   const startPrescribe = (pt: Patient) => {
     setBuilderPatient(pt); setPrescription([]); setNote("");
     setSection("builder");
+  };
+
+  // ── Custom exercise CRUD ─────────────────────────────────────
+  const handleAddExercise = async (ex: CustomExercise) => {
+    setCustomExercises([...customExercises, ex]);
+    if (dbReady) await insertCustomExercise(ex);
+  };
+
+  const handleDeleteExercise = async (id: string) => {
+    setCustomExercises(customExercises.filter((e) => e.id !== id));
+    if (dbReady) await dbDeleteExercise(id);
+  };
+
+  const handleAddProtocol = async (pr: CustomProtocol) => {
+    setCustomProtocols([...customProtocols, pr]);
+    if (dbReady) await insertCustomProtocol(pr);
+  };
+
+  const handleDeleteProtocol = async (id: string) => {
+    setCustomProtocols(customProtocols.filter((p) => p.id !== id));
+    if (dbReady) await dbDeleteProtocol(id);
   };
 
   // ── Prescription helpers ─────────────────────────────────────
@@ -144,7 +218,7 @@ export default function PhysioPage() {
     setPrescription(arr);
   };
 
-  const updateExercise = (id: string, field: "sets" | "reps" | "note", value: string | number) =>
+  const updateExerciseField = (id: string, field: "sets" | "reps" | "note", value: string | number) =>
     setPrescription(prescription.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
 
   // ── Protocol loading (standard + custom) ────────────────────
@@ -181,6 +255,23 @@ export default function PhysioPage() {
       <div className="flex-1 overflow-auto md:max-h-screen">
         <div className="p-5 md:p-[22px_28px] max-w-[1080px] pb-24 md:pb-6">
 
+          {/* DB status banner */}
+          {!loading && !dbReady && (
+            <div
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl mb-4 text-xs"
+              style={{
+                background: "rgba(245,158,11,0.06)",
+                border: "1px solid rgba(245,158,11,0.15)",
+                color: "#f59e0b",
+              }}
+            >
+              <span>⚠️ Running in demo mode — data won&apos;t persist.</span>
+              <a href="/setup" className="font-semibold underline" style={{ color: "#f59e0b" }}>
+                Connect Supabase →
+              </a>
+            </div>
+          )}
+
           {section === "patients" && (
             <PatientsSection
               patients={patients}
@@ -201,7 +292,7 @@ export default function PhysioPage() {
               onAdd={addExercise}
               onRemove={removeExercise}
               onMove={moveExercise}
-              onUpdateEx={updateExercise}
+              onUpdateEx={updateExerciseField}
               onFrequency={setFrequency}
               onNote={setNote}
               onLoadProtocol={() => setShowProto(true)}
@@ -225,10 +316,10 @@ export default function PhysioPage() {
             <ExerciseBuilderSection
               customExercises={customExercises}
               customProtocols={customProtocols}
-              onAddExercise={(ex) => setCustomExercises([...customExercises, ex])}
-              onDeleteExercise={(id) => setCustomExercises(customExercises.filter((e) => e.id !== id))}
-              onAddProtocol={(pr) => setCustomProtocols([...customProtocols, pr])}
-              onDeleteProtocol={(id) => setCustomProtocols(customProtocols.filter((p) => p.id !== id))}
+              onAddExercise={handleAddExercise}
+              onDeleteExercise={handleDeleteExercise}
+              onAddProtocol={handleAddProtocol}
+              onDeleteProtocol={handleDeleteProtocol}
               onFlash={flash}
             />
           )}
