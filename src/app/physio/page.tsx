@@ -92,10 +92,11 @@ export default function PhysioPage() {
         fetchCustomExercises(),
         fetchCustomProtocols(),
       ]);
-      setPatients(pts.length > 0 ? pts : DEMO_PATIENTS);
+      setPatients(pts);
       setCustomExercises(exs);
       setCustomProtocols(prs);
     } else {
+      // No Supabase — use demo data so the app is still usable
       setPatients(DEMO_PATIENTS);
     }
     setLoading(false);

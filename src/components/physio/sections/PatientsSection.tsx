@@ -52,7 +52,7 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }
             minHeight: 44,
           }}
         >
-          ＋ Add
+          ＋ Add Patient
         </button>
       </div>
 
@@ -95,9 +95,11 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }
       {filtered.length === 0 && (
         <div className="text-center py-10" style={{ color: "#2d333b" }}>
           <div className="text-4xl mb-3">👥</div>
-          <div className="text-sm mb-1" style={{ color: "#4a5568" }}>No patients found</div>
+          <div className="text-sm mb-1" style={{ color: "#4a5568" }}>
+            {patients.length === 0 ? "No patients yet" : "No patients found"}
+          </div>
           <div className="text-xs">
-            {patients.length === 0 ? 'Tap "Add" to get started' : "Try a different search"}
+            {patients.length === 0 ? "Click Add Patient to get started" : "Try a different search"}
           </div>
         </div>
       )}
