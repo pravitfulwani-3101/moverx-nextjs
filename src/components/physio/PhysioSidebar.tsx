@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export type PhysioSection = "patients" | "builder" | "protocols" | "analytics" | "exercise-builder";
+export type PhysioSection = "patients" | "appointments" | "builder" | "protocols" | "analytics" | "exercise-builder";
 
 interface PhysioSidebarProps {
   section: PhysioSection;
@@ -9,6 +9,7 @@ interface PhysioSidebarProps {
 
 const NAV: { id: PhysioSection; label: string; icon: string }[] = [
   { id: "patients",         label: "Patients",          icon: "👥" },
+  { id: "appointments",     label: "Appointments",       icon: "📅" },
   { id: "builder",          label: "Prescribe",          icon: "📋" },
   { id: "protocols",        label: "Protocols",          icon: "📚" },
   { id: "exercise-builder", label: "Exercise Builder",   icon: "🔧" },

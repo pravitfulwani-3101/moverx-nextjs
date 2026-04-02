@@ -29,7 +29,7 @@ export default function SetupPage() {
     if (!sb) { setStatus("error"); setError("Client creation failed"); return; }
 
     // Test each table
-    const tables = ["patients", "prescriptions", "exercise_completions", "custom_exercises", "custom_protocols"];
+    const tables = ["patients", "prescriptions", "exercise_completions", "custom_exercises", "custom_protocols", "appointments"];
     const results: Record<string, boolean> = {};
 
     for (const t of tables) {

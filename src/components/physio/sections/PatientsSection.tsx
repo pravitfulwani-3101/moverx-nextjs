@@ -11,9 +11,10 @@ interface PatientsSectionProps {
   onView: (p: Patient) => void;
   onEdit: (p: Patient) => void;
   onPrescribe: (p: Patient) => void;
+  onBook: (p: Patient) => void;
 }
 
-export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }: PatientsSectionProps) {
+export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe, onBook }: PatientsSectionProps) {
   const [search, setSearch] = useState("");
 
   const filtered = patients.filter(
@@ -175,6 +176,18 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe }
                   }}
                 >
                   ✏️ Edit
+                </button>
+                <button
+                  onClick={() => onBook(p)}
+                  className="px-3 py-2.5 rounded-lg text-[10px] font-semibold cursor-pointer"
+                  style={{
+                    border: "1px solid rgba(59,130,246,0.25)",
+                    background: "rgba(59,130,246,0.06)",
+                    color: "#3b82f6",
+                    minHeight: 44,
+                  }}
+                >
+                  📅 Book
                 </button>
                 <button
                   onClick={() => onPrescribe(p)}

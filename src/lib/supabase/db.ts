@@ -1,7 +1,7 @@
 "use client";
 
 import { getSupabase } from "./client";
-import type { Patient, CustomExercise, CustomProtocol, PrescribedExercise } from "@/types";
+import type { Patient, CustomExercise, CustomProtocol, PrescribedExercise, Appointment } from "@/types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -209,5 +209,70 @@ export async function savePrescription(
   });
 
   if (error) { console.error("savePrescription:", error.message); return false; }
+  return true;
+}
+
+// ── Appointments ────────────────────────────────────────────
+
+export async function fetchAppointments(): Promise<Appointment[]> {
+  const sb = getSupabase();
+  if (!sb) return [];
+
+  const { data, error } = await sb
+    .from("appointments")
+    .select("*")
+    .order("date", { ascending: true })
+    .order("time", { ascending: true });
+
+  if (error) { console.error("fetchAppointments:", error.message); return []; }
+
+  return (data ?? []).map((r: any) => ({
+    id: r.id,
+    patientId: r.patient_id,
+    patientName: r.patient_name,
+    date: r.date,
+    time: r.time,
+    duration: r.duration,
+    type: r.type,
+    status: r.status,
+    notes: r.notes ?? "",
+  }));
+}
+
+export async function insertAppointment(appt: Appointment): Promise<boolean> {
+  const sb = getSupabase();
+  if (!sb) return false;
+
+  const { error } = await sb.from("appointments").insert({
+    id: appt.id,
+    patient_id: appt.patientId,
+    patient_name: appt.patientName,
+    date: appt.date,
+    time: appt.time,
+    duration: appt.duration,
+    type: appt.type,
+    status: appt.status,
+    notes: appt.notes,
+  });
+
+  if (error) { console.error("insertAppointment:", error.message); return false; }
+  return true;
+}
+
+export async function updateAppointmentStatus(id: string, status: Appointment["status"]): Promise<boolean> {
+  const sb = getSupabase();
+  if (!sb) return false;
+
+  const { error } = await sb.from("appointments").update({ status }).eq("id", id);
+  if (error) { console.error("updateAppointmentStatus:", error.message); return false; }
+  return true;
+}
+
+export async function deleteAppointment(id: string): Promise<boolean> {
+  const sb = getSupabase();
+  if (!sb) return false;
+
+  const { error } = await sb.from("appointments").delete().eq("id", id);
+  if (error) { console.error("deleteAppointment:", error.message); return false; }
   return true;
 }

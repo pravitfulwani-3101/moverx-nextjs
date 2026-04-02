@@ -111,3 +111,19 @@ export interface CustomProtocol {
 }
 
 export type AnyExercise = Exercise | CustomExercise;
+
+export type AppointmentType = "Initial Assessment" | "Follow-up" | "Review";
+export type AppointmentStatus = "scheduled" | "completed" | "cancelled" | "no-show";
+export type AppointmentDuration = 30 | 45 | 60;
+
+export interface Appointment {
+  id: string;
+  patientId: string;
+  patientName: string;
+  date: string;       // YYYY-MM-DD
+  time: string;       // HH:mm
+  duration: AppointmentDuration;
+  type: AppointmentType;
+  status: AppointmentStatus;
+  notes: string;
+}
