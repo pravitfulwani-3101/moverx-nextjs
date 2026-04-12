@@ -22,14 +22,21 @@ export async function fetchPatients(): Promise<Patient[]> {
     id: r.id,
     name: r.name,
     phone: r.phone,
+    occupation: r.occupation ?? "",
+    dominantHand: r.dominant_hand ?? "",
+    lifestyle: r.lifestyle ?? "",
     condition: r.condition ?? "Not specified",
     sport: r.sport ?? "Not specified",
+    complaintP1: r.complaint_p1 ?? "",
+    complaintP2: r.complaint_p2 ?? "",
+    complaintP3: r.complaint_p3 ?? "",
     age: r.age ?? 0,
     adherence: r.adherence ?? 0,
     sessions: r.sessions ?? 0,
     avatar: r.avatar ?? r.name.slice(0, 2).toUpperCase(),
     status: r.status as Patient["status"],
     prescribedExercises: [],
+    clinicalNotes: r.clinical_notes ? (typeof r.clinical_notes === "string" ? JSON.parse(r.clinical_notes) : r.clinical_notes) : undefined,
     notes: r.notes ?? undefined,
   }));
 }
@@ -42,13 +49,20 @@ export async function insertPatient(pt: Patient): Promise<boolean> {
     id: pt.id,
     name: pt.name,
     phone: pt.phone,
+    occupation: pt.occupation ?? null,
+    dominant_hand: pt.dominantHand ?? null,
+    lifestyle: pt.lifestyle ?? null,
     condition: pt.condition,
     sport: pt.sport,
+    complaint_p1: pt.complaintP1 ?? null,
+    complaint_p2: pt.complaintP2 ?? null,
+    complaint_p3: pt.complaintP3 ?? null,
     age: pt.age,
     status: pt.status,
     adherence: pt.adherence,
     sessions: pt.sessions,
     avatar: pt.avatar,
+    clinical_notes: pt.clinicalNotes ? JSON.stringify(pt.clinicalNotes) : null,
     notes: pt.notes ?? null,
   });
 
@@ -58,12 +72,27 @@ export async function insertPatient(pt: Patient): Promise<boolean> {
 
 export async function updatePatient(
   id: string,
-  fields: Partial<Pick<Patient, "name" | "phone" | "condition" | "sport" | "age" | "avatar" | "notes" | "status" | "adherence" | "sessions">>
+  fields: Partial<Pick<Patient, "name" | "phone" | "occupation" | "dominantHand" | "lifestyle" | "condition" | "sport" | "complaintP1" | "complaintP2" | "complaintP3" | "age" | "avatar" | "clinicalNotes" | "notes" | "status" | "adherence" | "sessions">>
 ): Promise<boolean> {
   const sb = getSupabase();
   if (!sb) return false;
 
-  const { error } = await sb.from("patients").update(fields).eq("id", id);
+  // Map camelCase fields to snake_case for DB
+  const dbFields: Record<string, any> = {};
+  const fieldMap: Record<string, string> = {
+    dominantHand: "dominant_hand",
+    complaintP1: "complaint_p1",
+    complaintP2: "complaint_p2",
+    complaintP3: "complaint_p3",
+    clinicalNotes: "clinical_notes",
+  };
+
+  for (const [key, val] of Object.entries(fields)) {
+    const dbKey = fieldMap[key] ?? key;
+    dbFields[dbKey] = dbKey === "clinical_notes" && val ? JSON.stringify(val) : val;
+  }
+
+  const { error } = await sb.from("patients").update(dbFields).eq("id", id);
   if (error) { console.error("updatePatient:", error.message); return false; }
   return true;
 }

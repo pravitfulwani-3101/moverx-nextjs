@@ -47,18 +47,44 @@ export interface Protocol {
   color: string;
 }
 
+export interface AssessmentViewNotes {
+  left: string;
+  right: string;
+  back: string;
+  front: string;
+}
+
+export interface ClinicalNotes {
+  medicalHistory: string;
+  investigations: { type: string; notes: string }[];
+  injuryHistory: string;
+  assessment: {
+    posture: AssessmentViewNotes;
+    posterior: AssessmentViewNotes;
+    anterior: AssessmentViewNotes;
+    lateral: AssessmentViewNotes;
+  };
+}
+
 export interface Patient {
   id: string;
   name: string;
   age: number;
   phone: string;
+  occupation: string;
+  dominantHand: string;
+  lifestyle: string;
   condition: string;
   sport: string;
+  complaintP1: string;
+  complaintP2: string;
+  complaintP3: string;
   adherence: number;
   sessions: number;
   avatar: string;
   status: PatientStatus;
   prescribedExercises: string[];
+  clinicalNotes?: ClinicalNotes;
   notes?: string;
 }
 

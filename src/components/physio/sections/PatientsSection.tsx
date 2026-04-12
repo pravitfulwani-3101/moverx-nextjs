@@ -38,7 +38,7 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe, 
       <div className="flex justify-between items-center mb-5">
         <div>
           <h1 className="text-[22px] font-black m-0 mb-1" style={{ color: "#f0f6fc" }}>
-            Your Patients
+            Your Members
           </h1>
           <p className="text-xs m-0" style={{ color: "#3d4450" }}>
             {patients.length} patients · {patients.filter((p) => p.status === "at-risk").length} need attention
@@ -53,7 +53,7 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe, 
             minHeight: 44,
           }}
         >
-          ＋ Add Patient
+          ＋ Add Member
         </button>
       </div>
 
@@ -100,7 +100,7 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe, 
             {patients.length === 0 ? "No patients yet" : "No patients found"}
           </div>
           <div className="text-xs">
-            {patients.length === 0 ? "Click Add Patient to get started" : "Try a different search"}
+            {patients.length === 0 ? "Click Add Member to get started" : "Try a different search"}
           </div>
         </div>
       )}

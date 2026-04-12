@@ -1,12 +1,12 @@
 import type { Patient, Athlete, AcadProtocol } from "@/types";
 
 export const DEMO_PATIENTS: Patient[] = [
-  { id:"p1", name:"Rajesh Sharma",    age:45, phone:"+91 98201 XXXXX", condition:"Post ACL Repair",      sport:"Cricket",          adherence:85, sessions:8,  avatar:"RS", status:"active",  prescribedExercises:["k1","k2","k3","h1","h2"] },
-  { id:"p2", name:"Priya Nair",       age:32, phone:"+91 98765 XXXXX", condition:"Frozen Shoulder (R)",  sport:"Badminton",        adherence:62, sessions:12, avatar:"PN", status:"active",  prescribedExercises:["s1","s2","s4"] },
-  { id:"p3", name:"Amit Patel",       age:58, phone:"+91 99876 XXXXX", condition:"Lumbar Disc L4-L5",    sport:"General Fitness",  adherence:91, sessions:15, avatar:"AP", status:"active",  prescribedExercises:["b3","b4","b2","h2"] },
-  { id:"p4", name:"Sneha Kulkarni",   age:27, phone:"+91 98345 XXXXX", condition:"Tennis Elbow",         sport:"Tennis",           adherence:45, sessions:4,  avatar:"SK", status:"at-risk", prescribedExercises:["w1","w2","s5"] },
-  { id:"p5", name:"Kavita Desai",     age:35, phone:"+91 97654 XXXXX", condition:"Runner's Knee",        sport:"Marathon",         adherence:94, sessions:10, avatar:"KD", status:"active",  prescribedExercises:["k1","k4","h1","h3","a1"] },
-  { id:"p6", name:"Arjun Menon",      age:19, phone:"+91 96543 XXXXX", condition:"Ankle Sprain Grade 2", sport:"Football",         adherence:55, sessions:3,  avatar:"AM", status:"at-risk", prescribedExercises:["a1","a2","a3","h1"] },
+  { id:"p1", name:"Rajesh Sharma",    age:45, phone:"+91 98201 XXXXX", condition:"Post ACL Repair",      sport:"Cricket",          occupation:"", dominantHand:"Right", lifestyle:"Active", complaintP1:"", complaintP2:"", complaintP3:"", adherence:85, sessions:8,  avatar:"RS", status:"active",  prescribedExercises:["k1","k2","k3","h1","h2"] },
+  { id:"p2", name:"Priya Nair",       age:32, phone:"+91 98765 XXXXX", condition:"Frozen Shoulder (R)",  sport:"Badminton",        occupation:"", dominantHand:"Right", lifestyle:"Active", complaintP1:"", complaintP2:"", complaintP3:"", adherence:62, sessions:12, avatar:"PN", status:"active",  prescribedExercises:["s1","s2","s4"] },
+  { id:"p3", name:"Amit Patel",       age:58, phone:"+91 99876 XXXXX", condition:"Lumbar Disc L4-L5",    sport:"General Fitness",  occupation:"", dominantHand:"Right", lifestyle:"Sedentary", complaintP1:"", complaintP2:"", complaintP3:"", adherence:91, sessions:15, avatar:"AP", status:"active",  prescribedExercises:["b3","b4","b2","h2"] },
+  { id:"p4", name:"Sneha Kulkarni",   age:27, phone:"+91 98345 XXXXX", condition:"Tennis Elbow",         sport:"Tennis",           occupation:"", dominantHand:"Right", lifestyle:"Active", complaintP1:"", complaintP2:"", complaintP3:"", adherence:45, sessions:4,  avatar:"SK", status:"at-risk", prescribedExercises:["w1","w2","s5"] },
+  { id:"p5", name:"Kavita Desai",     age:35, phone:"+91 97654 XXXXX", condition:"Runner's Knee",        sport:"Marathon",         occupation:"", dominantHand:"Right", lifestyle:"Active", complaintP1:"", complaintP2:"", complaintP3:"", adherence:94, sessions:10, avatar:"KD", status:"active",  prescribedExercises:["k1","k4","h1","h3","a1"] },
+  { id:"p6", name:"Arjun Menon",      age:19, phone:"+91 96543 XXXXX", condition:"Ankle Sprain Grade 2", sport:"Football",         occupation:"", dominantHand:"Right", lifestyle:"Active", complaintP1:"", complaintP2:"", complaintP3:"", adherence:55, sessions:3,  avatar:"AM", status:"at-risk", prescribedExercises:["a1","a2","a3","h1"] },
 ];
 
 export const CONDITIONS = [
@@ -18,6 +18,14 @@ export const CONDITIONS = [
 export const SPORT_OPTIONS = [
   "Cricket","Football","Running","Badminton","Gym / Strength",
   "Kabaddi","Tennis","Swimming","Marathon","Volleyball","General Fitness","Other",
+];
+
+export const LIFESTYLE_OPTIONS = ["Sedentary", "Active"];
+
+export const DOMINANCE_OPTIONS = ["Left", "Right", "Ambidextrous"];
+
+export const INVESTIGATION_OPTIONS = [
+  "X-Ray", "MRI", "CT Scan", "Ultrasound", "Blood Work", "EMG/NCV", "DEXA Scan", "Other",
 ];
 
 export const DIFF_COLOR: Record<string, string> = {

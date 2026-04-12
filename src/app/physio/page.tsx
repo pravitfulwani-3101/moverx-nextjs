@@ -10,7 +10,7 @@ import { ProtocolsSection } from "@/components/physio/sections/ProtocolsSection"
 import { AnalyticsSection } from "@/components/physio/sections/AnalyticsSection";
 import { ExerciseBuilderSection } from "@/components/physio/sections/ExerciseBuilderSection";
 
-import { AddPatientModal, type PatientFormData } from "@/components/physio/modals/AddPatientModal";
+import { AddPatientModal, BLANK_PATIENT_FORM, type PatientFormData } from "@/components/physio/modals/AddPatientModal";
 import { EditPatientModal } from "@/components/physio/modals/EditPatientModal";
 import { ViewPatientModal } from "@/components/physio/modals/ViewPatientModal";
 import { WhatsAppModal } from "@/components/physio/modals/WhatsAppModal";
@@ -34,7 +34,7 @@ import { DEMO_PATIENTS } from "@/data/demo";
 import { EXERCISE_DB, PROTOCOLS } from "@/data/constants";
 import type { Patient, PrescribedExercise, CustomExercise, CustomProtocol, Appointment } from "@/types";
 
-const BLANK_FORM: PatientFormData = { name: "", phone: "", condition: "", sport: "", age: "", notes: "" };
+const BLANK_FORM: PatientFormData = BLANK_PATIENT_FORM;
 
 function generateAvatar(name: string) {
   const parts = name.trim().split(" ");
@@ -122,17 +122,23 @@ export default function PhysioPage() {
       id: "p" + Date.now(),
       name: newPtForm.name.trim(),
       phone: newPtForm.phone.trim(),
+      occupation: newPtForm.occupation || "",
+      dominantHand: newPtForm.dominantHand || "",
+      lifestyle: newPtForm.lifestyle || "",
       condition: newPtForm.condition || "Not specified",
       sport: newPtForm.sport || "Not specified",
+      complaintP1: newPtForm.complaintP1 || "",
+      complaintP2: newPtForm.complaintP2 || "",
+      complaintP3: newPtForm.complaintP3 || "",
       age: parseInt(newPtForm.age) || 0,
       adherence: 0, sessions: 0,
       avatar: generateAvatar(newPtForm.name),
       status: "active", prescribedExercises: [],
-      notes: newPtForm.notes,
+      clinicalNotes: newPtForm.clinicalNotes,
     };
 
     setPatients([pt, ...patients]);
-    setNewPtForm(BLANK_FORM);
+    setNewPtForm(JSON.parse(JSON.stringify(BLANK_FORM)));
     setShowAddPt(false);
     flash(`Added: ${pt.name}`);
 
@@ -150,11 +156,17 @@ export default function PhysioPage() {
     const updates = {
       name: editPtForm.name.trim(),
       phone: editPtForm.phone.trim(),
+      occupation: editPtForm.occupation || showEditPt!.occupation,
+      dominantHand: editPtForm.dominantHand || showEditPt!.dominantHand,
+      lifestyle: editPtForm.lifestyle || showEditPt!.lifestyle,
       condition: editPtForm.condition || showEditPt!.condition,
       sport: editPtForm.sport || showEditPt!.sport,
+      complaintP1: editPtForm.complaintP1 || "",
+      complaintP2: editPtForm.complaintP2 || "",
+      complaintP3: editPtForm.complaintP3 || "",
       age: parseInt(editPtForm.age) || showEditPt!.age,
       avatar: generateAvatar(editPtForm.name),
-      notes: editPtForm.notes,
+      clinicalNotes: editPtForm.clinicalNotes,
     };
 
     setPatients(patients.map((p) => p.id === id ? { ...p, ...updates } : p));
@@ -179,8 +191,20 @@ export default function PhysioPage() {
   };
 
   const openEdit = (pt: Patient) => {
-    setEditPtForm({ name: pt.name, phone: pt.phone, condition: pt.condition,
-      sport: pt.sport, age: String(pt.age ?? ""), notes: pt.notes ?? "" });
+    setEditPtForm({
+      name: pt.name,
+      phone: pt.phone,
+      age: String(pt.age ?? ""),
+      occupation: pt.occupation ?? "",
+      dominantHand: pt.dominantHand ?? "",
+      lifestyle: pt.lifestyle ?? "",
+      condition: pt.condition,
+      sport: pt.sport,
+      complaintP1: pt.complaintP1 ?? "",
+      complaintP2: pt.complaintP2 ?? "",
+      complaintP3: pt.complaintP3 ?? "",
+      clinicalNotes: pt.clinicalNotes ?? JSON.parse(JSON.stringify(BLANK_PATIENT_FORM.clinicalNotes)),
+    });
     setShowEditPt(pt); setShowViewPt(null);
   };
 
@@ -334,7 +358,7 @@ export default function PhysioPage() {
           {section === "patients" && (
             <PatientsSection
               patients={patients}
-              onAdd={() => { setNewPtForm(BLANK_FORM); setShowAddPt(true); }}
+              onAdd={() => { setNewPtForm(JSON.parse(JSON.stringify(BLANK_FORM))); setShowAddPt(true); }}
               onView={(p) => setShowViewPt(p)}
               onEdit={openEdit}
               onPrescribe={startPrescribe}

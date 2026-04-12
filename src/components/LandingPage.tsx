@@ -25,7 +25,7 @@ const ROLES: RoleCard[] = [
   {
     id:       "physio",
     emoji:    "⚕️",
-    title:    "I'm a Physio",
+    title:    "Physical Therapist",
     subtitle: "Prescribe, track adherence, grow practice",
     accent:   "#3b82f6",
     href:     "/physio",
