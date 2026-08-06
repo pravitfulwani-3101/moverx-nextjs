@@ -10,11 +10,10 @@ interface PatientsSectionProps {
   onAdd: () => void;
   onView: (p: Patient) => void;
   onEdit: (p: Patient) => void;
-  onPrescribe: (p: Patient) => void;
   onBook: (p: Patient) => void;
 }
 
-export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe, onBook }: PatientsSectionProps) {
+export function PatientsSection({ patients, onAdd, onView, onEdit, onBook }: PatientsSectionProps) {
   const [search, setSearch] = useState("");
 
   const filtered = patients.filter(
@@ -41,7 +40,7 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe, 
             Your Members
           </h1>
           <p className="text-xs m-0" style={{ color: "#3d4450" }}>
-            {patients.length} patients · {patients.filter((p) => p.status === "at-risk").length} need attention
+            {patients.length} clients · {patients.filter((p) => p.status === "at-risk").length} need attention
           </p>
         </div>
         <button
@@ -81,7 +80,7 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe, 
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search patients..."
+        placeholder="Search clients..."
         className="w-full px-4 py-3 rounded-[10px] text-xs mb-3.5"
         style={{
           border: "1px solid rgba(255,255,255,0.06)",
@@ -97,7 +96,7 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe, 
         <div className="text-center py-10" style={{ color: "#2d333b" }}>
           <div className="text-4xl mb-3">👥</div>
           <div className="text-sm mb-1" style={{ color: "#4a5568" }}>
-            {patients.length === 0 ? "No patients yet" : "No patients found"}
+            {patients.length === 0 ? "No clients yet" : "No clients found"}
           </div>
           <div className="text-xs">
             {patients.length === 0 ? "Click Add Member to get started" : "Try a different search"}
@@ -179,25 +178,13 @@ export function PatientsSection({ patients, onAdd, onView, onEdit, onPrescribe, 
                 </button>
                 <button
                   onClick={() => onBook(p)}
-                  className="px-3 py-2.5 rounded-lg text-[10px] font-semibold cursor-pointer"
+                  className="px-4 py-2.5 rounded-lg text-[11px] font-semibold text-white cursor-pointer border-none"
                   style={{
-                    border: "1px solid rgba(59,130,246,0.25)",
-                    background: "rgba(59,130,246,0.06)",
-                    color: "#3b82f6",
+                    background: "linear-gradient(135deg,#3b82f6,#2563eb)",
                     minHeight: 44,
                   }}
                 >
                   📅 Book
-                </button>
-                <button
-                  onClick={() => onPrescribe(p)}
-                  className="px-4 py-2.5 rounded-lg text-[11px] font-semibold text-white cursor-pointer border-none"
-                  style={{
-                    background: "linear-gradient(135deg,#22c55e,#16a34a)",
-                    minHeight: 44,
-                  }}
-                >
-                  ＋ Prescribe
                 </button>
               </div>
             </div>

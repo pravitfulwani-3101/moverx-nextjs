@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { CONDITIONS, SPORT_OPTIONS, LIFESTYLE_OPTIONS, DOMINANCE_OPTIONS, INVESTIGATION_OPTIONS } from "@/data/demo";
 import { StickFigure } from "@/components/ui/StickFigure";
-import type { ClinicalNotes, AssessmentViewNotes } from "@/types";
+import type { ClinicalNotes, AssessmentViewNotes, Venue } from "@/types";
+
+export const VENUE_OPTIONS: Venue[] = ["Private Session", "Gold's Gym", "MBD"];
 
 const BLANK_VIEW_NOTES: AssessmentViewNotes = { left: "", right: "", back: "", front: "" };
 
@@ -32,6 +34,7 @@ export interface PatientFormData {
   complaintP2: string;
   complaintP3: string;
   clinicalNotes: ClinicalNotes;
+  venue: Venue;
 }
 
 export const BLANK_PATIENT_FORM: PatientFormData = {
@@ -47,6 +50,7 @@ export const BLANK_PATIENT_FORM: PatientFormData = {
   complaintP2: "",
   complaintP3: "",
   clinicalNotes: JSON.parse(JSON.stringify(BLANK_CLINICAL_NOTES)),
+  venue: "Private Session",
 };
 
 interface AddPatientModalProps {
@@ -202,6 +206,19 @@ export function AddPatientModal({ form, onChange, onSubmit, onClose }: AddPatien
               style={inputStyle}
               autoFocus
             />
+          </div>
+
+          <div>
+            {fieldLabel("Session Type *")}
+            <select
+              value={form.venue}
+              onChange={(e) => onChange({ ...form, venue: e.target.value as Venue })}
+              style={selectStyle}
+            >
+              {VENUE_OPTIONS.map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ))}
+            </select>
           </div>
 
           <div className="flex gap-3">

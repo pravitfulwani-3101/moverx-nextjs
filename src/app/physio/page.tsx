@@ -16,6 +16,7 @@ import { ViewPatientModal } from "@/components/physio/modals/ViewPatientModal";
 import { WhatsAppModal } from "@/components/physio/modals/WhatsAppModal";
 import { ProtocolPickerModal } from "@/components/physio/modals/ProtocolPickerModal";
 import { AddAppointmentModal, type AppointmentFormData } from "@/components/physio/modals/AddAppointmentModal";
+import { CompleteSessionModal } from "@/components/physio/modals/CompleteSessionModal";
 
 import { Toast, useToast } from "@/components/ui/Toast";
 import { BottomTabBar, type BottomTab } from "@/components/ui/BottomTabBar";
@@ -27,7 +28,7 @@ import {
   fetchPatients, insertPatient, updatePatient, deletePatient as dbDeletePatient,
   fetchCustomExercises, insertCustomExercise, deleteCustomExercise as dbDeleteExercise,
   fetchCustomProtocols, insertCustomProtocol, deleteCustomProtocol as dbDeleteProtocol,
-  fetchAppointments, insertAppointment, updateAppointmentStatus, deleteAppointment as dbDeleteAppt,
+  fetchAppointments, insertAppointment, updateAppointmentStatus, completeAppointment as dbCompleteAppt, deleteAppointment as dbDeleteAppt,
 } from "@/lib/supabase/db";
 
 import { DEMO_PATIENTS } from "@/data/demo";
@@ -43,12 +44,10 @@ function generateAvatar(name: string) {
     : name.slice(0, 2).toUpperCase();
 }
 
+// Prescribe / Protocols / Analytics tabs hidden for the simplified freelancer workflow.
 const PHYSIO_TABS: BottomTab[] = [
-  { id: "patients",      label: "Patients",  icon: "👥" },
-  { id: "appointments",  label: "Appts",     icon: "📅" },
-  { id: "builder",       label: "Prescribe", icon: "📋" },
-  { id: "protocols",     label: "Protocols", icon: "📚" },
-  { id: "analytics",     label: "Analytics", icon: "📊" },
+  { id: "patients",      label: "Clients",   icon: "👥" },
+  { id: "appointments",  label: "Calendar",  icon: "📅" },
 ];
 
 export default function PhysioPage() {
@@ -66,6 +65,7 @@ export default function PhysioPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [showAddAppt, setShowAddAppt] = useState(false);
   const [apptPreselect, setApptPreselect] = useState<Patient | null>(null);
+  const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null);
 
   // ── Modals ──────────────────────────────────────────────────
   const [showAddPt, setShowAddPt] = useState(false);
@@ -135,6 +135,7 @@ export default function PhysioPage() {
       avatar: generateAvatar(newPtForm.name),
       status: "active", prescribedExercises: [],
       clinicalNotes: newPtForm.clinicalNotes,
+      venue: newPtForm.venue,
     };
 
     setPatients([pt, ...patients]);
@@ -167,6 +168,7 @@ export default function PhysioPage() {
       age: parseInt(editPtForm.age) || showEditPt!.age,
       avatar: generateAvatar(editPtForm.name),
       clinicalNotes: editPtForm.clinicalNotes,
+      venue: editPtForm.venue,
     };
 
     setPatients(patients.map((p) => p.id === id ? { ...p, ...updates } : p));
@@ -204,13 +206,9 @@ export default function PhysioPage() {
       complaintP2: pt.complaintP2 ?? "",
       complaintP3: pt.complaintP3 ?? "",
       clinicalNotes: pt.clinicalNotes ?? JSON.parse(JSON.stringify(BLANK_PATIENT_FORM.clinicalNotes)),
+      venue: pt.venue,
     });
     setShowEditPt(pt); setShowViewPt(null);
-  };
-
-  const startPrescribe = (pt: Patient) => {
-    setBuilderPatient(pt); setPrescription([]); setNote("");
-    setSection("builder");
   };
 
   const openBookForPatient = (pt: Patient) => {
@@ -233,6 +231,7 @@ export default function PhysioPage() {
       type: form.type,
       status: "scheduled",
       notes: form.notes,
+      amount: 0,
     };
 
     setAppointments([...appointments, appt]);
@@ -252,6 +251,19 @@ export default function PhysioPage() {
 
     if (dbReady) {
       await updateAppointmentStatus(id, status);
+    }
+  };
+
+  const handleCompleteAppointment = async (notes: string, amount: number) => {
+    if (!completingAppt) return;
+    const id = completingAppt.id;
+    setAppointments(appointments.map((a) => a.id === id ? { ...a, status: "completed", notes, amount } : a));
+    setCompletingAppt(null);
+    flash(`Session completed — ₹${amount}`);
+
+    if (dbReady) {
+      const ok = await dbCompleteAppt(id, notes, amount);
+      if (!ok) flash("Warning: failed to save session to database");
     }
   };
 
@@ -361,7 +373,6 @@ export default function PhysioPage() {
               onAdd={() => { setNewPtForm(JSON.parse(JSON.stringify(BLANK_FORM))); setShowAddPt(true); }}
               onView={(p) => setShowViewPt(p)}
               onEdit={openEdit}
-              onPrescribe={startPrescribe}
               onBook={openBookForPatient}
             />
           )}
@@ -371,6 +382,7 @@ export default function PhysioPage() {
               appointments={appointments}
               onAdd={() => { setApptPreselect(null); setShowAddAppt(true); }}
               onStatusChange={handleApptStatusChange}
+              onComplete={(appt) => setCompletingAppt(appt)}
               onDelete={handleDeleteAppt}
             />
           )}
@@ -438,8 +450,7 @@ export default function PhysioPage() {
           onClose={() => setShowEditPt(null)} />
       )}
       {showViewPt && (
-        <ViewPatientModal patient={showViewPt}
-          onPrescribe={() => { setShowViewPt(null); startPrescribe(showViewPt); }}
+        <ViewPatientModal patient={showViewPt} appointments={appointments}
           onEdit={() => openEdit(showViewPt)} onClose={() => setShowViewPt(null)} />
       )}
       {showWA && (
@@ -463,6 +474,13 @@ export default function PhysioPage() {
           preselectedPatient={apptPreselect}
           onSubmit={handleAddAppointment}
           onClose={() => { setShowAddAppt(false); setApptPreselect(null); }}
+        />
+      )}
+      {completingAppt && (
+        <CompleteSessionModal
+          appointment={completingAppt}
+          onSubmit={handleCompleteAppointment}
+          onClose={() => setCompletingAppt(null)}
         />
       )}
     </div>

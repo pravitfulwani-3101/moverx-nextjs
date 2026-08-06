@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { CONDITIONS, SPORT_OPTIONS, LIFESTYLE_OPTIONS, DOMINANCE_OPTIONS, INVESTIGATION_OPTIONS } from "@/data/demo";
 import { StickFigure } from "@/components/ui/StickFigure";
-import type { PatientFormData } from "./AddPatientModal";
-import type { Patient, ClinicalNotes } from "@/types";
+import { VENUE_OPTIONS, type PatientFormData } from "./AddPatientModal";
+import type { Patient, ClinicalNotes, Venue } from "@/types";
 
 interface EditPatientModalProps {
   patient: Patient;
@@ -144,6 +144,19 @@ export function EditPatientModal({ patient, form, onChange, onSubmit, onDelete, 
           <div>
             {fieldLabel("Name *")}
             <input value={form.name} onChange={(e) => set("name", e.target.value)} style={inputStyle} />
+          </div>
+
+          <div>
+            {fieldLabel("Session Type *")}
+            <select
+              value={form.venue}
+              onChange={(e) => onChange({ ...form, venue: e.target.value as Venue })}
+              style={selectStyle}
+            >
+              {VENUE_OPTIONS.map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ))}
+            </select>
           </div>
 
           <div className="flex gap-3">

@@ -7,6 +7,7 @@ interface AppointmentsSectionProps {
   appointments: Appointment[];
   onAdd: () => void;
   onStatusChange: (id: string, status: AppointmentStatus) => void;
+  onComplete: (appt: Appointment) => void;
   onDelete: (id: string) => void;
 }
 
@@ -42,7 +43,7 @@ function formatTime12(time: string): string {
 // Time slots for the day view: 8am to 8pm
 const HOUR_SLOTS = Array.from({ length: 13 }, (_, i) => i + 8);
 
-export function AppointmentsSection({ appointments, onAdd, onStatusChange, onDelete }: AppointmentsSectionProps) {
+export function AppointmentsSection({ appointments, onAdd, onStatusChange, onComplete, onDelete }: AppointmentsSectionProps) {
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [view, setView] = useState<"day" | "week">("day");
 
@@ -243,6 +244,7 @@ export function AppointmentsSection({ appointments, onAdd, onStatusChange, onDel
                           key={appt.id}
                           appt={appt}
                           onStatusChange={onStatusChange}
+                          onComplete={onComplete}
                           onDelete={onDelete}
                         />
                       ))}
@@ -334,10 +336,12 @@ export function AppointmentsSection({ appointments, onAdd, onStatusChange, onDel
 function AppointmentCard({
   appt,
   onStatusChange,
+  onComplete,
   onDelete,
 }: {
   appt: Appointment;
   onStatusChange: (id: string, status: AppointmentStatus) => void;
+  onComplete: (appt: Appointment) => void;
   onDelete: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -371,6 +375,7 @@ function AppointmentCard({
           </div>
           <div className="text-[10px] mt-0.5" style={{ color: "#3d4450" }}>
             {formatTime12(appt.time)} · {appt.duration}min · {appt.type}
+            {appt.status === "completed" && appt.amount > 0 && ` · ₹${appt.amount}`}
           </div>
         </div>
         <div
@@ -396,7 +401,7 @@ function AppointmentCard({
             {appt.status === "scheduled" && (
               <>
                 <button
-                  onClick={() => onStatusChange(appt.id, "completed")}
+                  onClick={() => onComplete(appt)}
                   className="px-2.5 rounded-md text-[10px] font-semibold cursor-pointer border-none"
                   style={{ background: "rgba(34,197,94,0.1)", color: "#22c55e", minHeight: 32 }}
                 >

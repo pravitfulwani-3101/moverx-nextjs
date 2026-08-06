@@ -7,13 +7,11 @@ interface PhysioSidebarProps {
   onSection: (s: PhysioSection) => void;
 }
 
+// Prescribe / Protocols / Exercise Builder / Analytics are hidden for the
+// simplified freelancer workflow — re-add here to bring them back.
 const NAV: { id: PhysioSection; label: string; icon: string }[] = [
-  { id: "patients",         label: "Patients",          icon: "👥" },
-  { id: "appointments",     label: "Appointments",       icon: "📅" },
-  { id: "builder",          label: "Prescribe",          icon: "📋" },
-  { id: "protocols",        label: "Protocols",          icon: "📚" },
-  { id: "exercise-builder", label: "Exercise Builder",   icon: "🔧" },
-  { id: "analytics",        label: "Analytics",          icon: "📊" },
+  { id: "patients",         label: "Clients",           icon: "👥" },
+  { id: "appointments",     label: "Calendar",           icon: "📅" },
 ];
 
 export function PhysioSidebar({ section, onSection }: PhysioSidebarProps) {

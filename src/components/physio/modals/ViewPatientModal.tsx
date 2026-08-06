@@ -1,25 +1,55 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { StickFigure } from "@/components/ui/StickFigure";
-import type { Patient } from "@/types";
+import { generateSessionSummaryPdf } from "@/lib/generateSessionSummaryPdf";
+import type { Patient, Appointment } from "@/types";
 
 interface ViewPatientModalProps {
   patient: Patient;
-  onPrescribe: () => void;
+  appointments: Appointment[];
   onEdit: () => void;
   onClose: () => void;
+}
+
+function currentMonth(): string {
+  return new Date().toISOString().slice(0, 7);
+}
+
+function monthLabel(month: string): string {
+  return new Date(month + "-01T00:00:00").toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 }
 
 type AssessmentType = "posture" | "posterior" | "anterior" | "lateral";
 type ViewType = "front" | "back" | "left" | "right";
 
-export function ViewPatientModal({ patient, onPrescribe, onEdit, onClose }: ViewPatientModalProps) {
+export function ViewPatientModal({ patient, appointments, onEdit, onClose }: ViewPatientModalProps) {
   const [expandedAssessment, setExpandedAssessment] = useState<AssessmentType | null>(null);
   const [viewingNote, setViewingNote] = useState<{ type: AssessmentType; view: ViewType } | null>(null);
+  const [month, setMonth] = useState(currentMonth());
+  const [exporting, setExporting] = useState(false);
 
   const cn = patient.clinicalNotes;
 
+  const monthSessions = useMemo(
+    () =>
+      appointments
+        .filter((a) => a.patientId === patient.id && a.status === "completed" && a.date.startsWith(month))
+        .sort((a, b) => b.date.localeCompare(a.date)),
+    [appointments, patient.id, month]
+  );
+  const monthTotal = monthSessions.reduce((sum, a) => sum + (a.amount ?? 0), 0);
+
+  const handleExportPdf = async () => {
+    setExporting(true);
+    try {
+      await generateSessionSummaryPdf(patient, monthSessions, monthLabel(month));
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const fields = [
     { label: "Phone",     value: patient.phone,                                  icon: "📱" },
+    { label: "Venue",     value: patient.venue,                                  icon: "📍" },
     { label: "Age",       value: patient.age ? `${patient.age} years` : "—",     icon: "🎂" },
     { label: "Occupation",value: patient.occupation || "—",                       icon: "💼" },
     { label: "Hand",      value: patient.dominantHand || "—",                     icon: "✋" },
@@ -89,6 +119,77 @@ export function ViewPatientModal({ patient, onPrescribe, onEdit, onClose }: View
               <div className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>{f.value}</div>
             </div>
           ))}
+        </div>
+
+        {/* Monthly Session Summary */}
+        <div
+          className="px-3.5 py-3.5 rounded-[10px] mb-4"
+          style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.12)" }}
+        >
+          <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+            <div className="text-[9px] font-bold tracking-[1px] uppercase" style={{ color: "#22c55e" }}>
+              💰 Billing Summary
+            </div>
+            <input
+              type="month"
+              value={month}
+              onChange={(e) => setMonth(e.target.value || currentMonth())}
+              className="px-2.5 py-1.5 rounded-lg text-[11px]"
+              style={{
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "#1a2234",
+                color: "#c9d1d9",
+              }}
+            />
+          </div>
+
+          <div className="flex gap-2.5 mb-3">
+            <div className="flex-1 px-3 py-2.5 rounded-[9px]" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <div className="text-[9px] mb-0.5" style={{ color: "#3d4450" }}>Sessions</div>
+              <div className="text-base font-black" style={{ color: "#f0f6fc" }}>{monthSessions.length}</div>
+            </div>
+            <div className="flex-1 px-3 py-2.5 rounded-[9px]" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <div className="text-[9px] mb-0.5" style={{ color: "#3d4450" }}>Total Amount</div>
+              <div className="text-base font-black" style={{ color: "#22c55e" }}>₹{monthTotal.toLocaleString("en-IN")}</div>
+            </div>
+          </div>
+
+          {monthSessions.length > 0 && (
+            <div className="flex flex-col gap-1.5 mb-3">
+              {monthSessions.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex items-start justify-between gap-2 px-2.5 py-2 rounded-[8px]"
+                  style={{ background: "rgba(255,255,255,0.02)" }}
+                >
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-semibold" style={{ color: "#c9d1d9" }}>
+                      {new Date(s.date + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                    </div>
+                    {s.notes && (
+                      <div className="text-[10px] leading-[1.5] truncate" style={{ color: "#4a5568" }}>{s.notes}</div>
+                    )}
+                  </div>
+                  <div className="text-[11px] font-bold flex-shrink-0" style={{ color: "#22c55e" }}>
+                    ₹{(s.amount ?? 0).toLocaleString("en-IN")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button
+            onClick={handleExportPdf}
+            disabled={exporting}
+            className="w-full py-2.5 rounded-[9px] text-xs font-bold cursor-pointer border-none"
+            style={{
+              background: "linear-gradient(135deg,#22c55e,#16a34a)",
+              color: "#fff",
+              opacity: exporting ? 0.6 : 1,
+            }}
+          >
+            {exporting ? "Generating…" : "📄 Export PDF for Client"}
+          </button>
         </div>
 
         {/* Complaints */}
@@ -238,15 +339,8 @@ export function ViewPatientModal({ patient, onPrescribe, onEdit, onClose }: View
         {/* Actions */}
         <div className="flex gap-2">
           <button
-            onClick={onPrescribe}
-            className="flex-1 py-3 rounded-[10px] text-xs font-bold text-white border-none cursor-pointer"
-            style={{ background: "linear-gradient(135deg,#22c55e,#16a34a)" }}
-          >
-            ＋ Prescribe
-          </button>
-          <button
             onClick={onEdit}
-            className="px-4.5 py-3 rounded-[10px] text-xs font-semibold cursor-pointer"
+            className="flex-1 py-3 rounded-[10px] text-xs font-bold cursor-pointer"
             style={{
               border: "1px solid rgba(255,255,255,0.08)",
               background: "rgba(255,255,255,0.04)",

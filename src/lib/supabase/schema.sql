@@ -16,6 +16,7 @@ create table if not exists patients (
   sessions    int default 0,
   avatar      text,
   notes       text,
+  venue       text check (venue in ('Private Session', 'Gold''s Gym', 'MBD')) default 'Private Session',
   created_at  timestamptz default now()
 );
 

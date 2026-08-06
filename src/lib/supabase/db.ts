@@ -38,6 +38,7 @@ export async function fetchPatients(): Promise<Patient[]> {
     prescribedExercises: [],
     clinicalNotes: r.clinical_notes ? (typeof r.clinical_notes === "string" ? JSON.parse(r.clinical_notes) : r.clinical_notes) : undefined,
     notes: r.notes ?? undefined,
+    venue: (r.venue ?? "Private Session") as Patient["venue"],
   }));
 }
 
@@ -64,6 +65,7 @@ export async function insertPatient(pt: Patient): Promise<boolean> {
     avatar: pt.avatar,
     clinical_notes: pt.clinicalNotes ? JSON.stringify(pt.clinicalNotes) : null,
     notes: pt.notes ?? null,
+    venue: pt.venue,
   });
 
   if (error) { console.error("insertPatient:", error.message); return false; }
@@ -72,7 +74,7 @@ export async function insertPatient(pt: Patient): Promise<boolean> {
 
 export async function updatePatient(
   id: string,
-  fields: Partial<Pick<Patient, "name" | "phone" | "occupation" | "dominantHand" | "lifestyle" | "condition" | "sport" | "complaintP1" | "complaintP2" | "complaintP3" | "age" | "avatar" | "clinicalNotes" | "notes" | "status" | "adherence" | "sessions">>
+  fields: Partial<Pick<Patient, "name" | "phone" | "occupation" | "dominantHand" | "lifestyle" | "condition" | "sport" | "complaintP1" | "complaintP2" | "complaintP3" | "age" | "avatar" | "clinicalNotes" | "notes" | "status" | "adherence" | "sessions" | "venue">>
 ): Promise<boolean> {
   const sb = getSupabase();
   if (!sb) return false;
@@ -265,6 +267,7 @@ export async function fetchAppointments(): Promise<Appointment[]> {
     type: r.type,
     status: r.status,
     notes: r.notes ?? "",
+    amount: r.amount ?? 0,
   }));
 }
 
@@ -282,6 +285,7 @@ export async function insertAppointment(appt: Appointment): Promise<boolean> {
     type: appt.type,
     status: appt.status,
     notes: appt.notes,
+    amount: appt.amount ?? 0,
   });
 
   if (error) { console.error("insertAppointment:", error.message); return false; }
@@ -294,6 +298,15 @@ export async function updateAppointmentStatus(id: string, status: Appointment["s
 
   const { error } = await sb.from("appointments").update({ status }).eq("id", id);
   if (error) { console.error("updateAppointmentStatus:", error.message); return false; }
+  return true;
+}
+
+export async function completeAppointment(id: string, notes: string, amount: number): Promise<boolean> {
+  const sb = getSupabase();
+  if (!sb) return false;
+
+  const { error } = await sb.from("appointments").update({ status: "completed", notes, amount }).eq("id", id);
+  if (error) { console.error("completeAppointment:", error.message); return false; }
   return true;
 }
 

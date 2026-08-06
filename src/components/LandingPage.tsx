@@ -11,8 +11,10 @@ interface RoleCard {
   subtitle: string;
   accent: string;       // hex accent colour
   href: string;
+  hidden?: boolean;
 }
 
+// Athlete & Academy are hidden for now — remove `hidden: true` to bring them back.
 const ROLES: RoleCard[] = [
   {
     id:       "athlete",
@@ -21,12 +23,13 @@ const ROLES: RoleCard[] = [
     subtitle: "Daily sport-specific prehab routines",
     accent:   "#22c55e",
     href:     "/athlete",
+    hidden:   true,
   },
   {
     id:       "physio",
     emoji:    "⚕️",
     title:    "Physical Therapist",
-    subtitle: "Prescribe, track adherence, grow practice",
+    subtitle: "Track clients, calendar & session billing",
     accent:   "#3b82f6",
     href:     "/physio",
   },
@@ -37,8 +40,11 @@ const ROLES: RoleCard[] = [
     subtitle: "Squad screening, injury risk, bulk assign",
     accent:   "#f59e0b",
     href:     "/academy",
+    hidden:   true,
   },
 ];
+
+const VISIBLE_ROLES = ROLES.filter((r) => !r.hidden);
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
@@ -85,13 +91,13 @@ export default function LandingPage() {
           MoveRx
         </h1>
         <p className="text-[15px] leading-[1.7] mb-10" style={{ color: "#4a5568" }}>
-          Sport-specific movement routines designed by<br />
-          certified sports physiotherapists. Stay injury-free.
+          Block your calendar, log session notes,<br />
+          and bill clients — all in one place.
         </p>
 
         {/* Role cards */}
         <div className="flex gap-3.5 justify-center flex-wrap">
-          {ROLES.map((role) => (
+          {VISIBLE_ROLES.map((role) => (
             <button
               key={role.id}
               onClick={() => router.push(role.href)}
@@ -113,7 +119,7 @@ export default function LandingPage() {
         </div>
 
         <p className="text-[11px] mt-8" style={{ color: "#2d333b" }}>
-          One platform · Three experiences · Connected by design
+          Built for freelance physical therapists
         </p>
       </div>
     </div>

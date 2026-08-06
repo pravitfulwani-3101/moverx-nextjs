@@ -4,6 +4,7 @@ export type Difficulty = "Easy" | "Medium" | "Hard";
 export type Phase = "warmup" | "prehab" | "cooldown";
 export type RiskStatus = "red" | "amber" | "green";
 export type PatientStatus = "active" | "at-risk";
+export type Venue = "Private Session" | "Gold's Gym" | "MBD";
 
 export interface Sport {
   id: string;
@@ -86,6 +87,7 @@ export interface Patient {
   prescribedExercises: string[];
   clinicalNotes?: ClinicalNotes;
   notes?: string;
+  venue: Venue;
 }
 
 export interface Athlete {
@@ -152,4 +154,5 @@ export interface Appointment {
   type: AppointmentType;
   status: AppointmentStatus;
   notes: string;
+  amount: number;
 }
